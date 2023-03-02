@@ -4,10 +4,10 @@ This repository contains some ideas to make Python as nearly FP as possible, wit
 
 How functional can python be? Functional languages have:
 * Immutable values and variables and complex types
-* Referential transparency: Functions should not have side-effects, such as modifying global state or performing I/O
+* Functions should not have side-effects (modifying global state, performing I/O)
 * Lazy evaluation
 * Tail-call optimization
-* [Algebraic data types](https://stackoverflow.com/questions/16258553)
+* Algebraic data types
 
 So here are some things to try.
 
@@ -18,7 +18,7 @@ So here are some things to try.
 * Use lots of [type hints](https://docs.python.org/3/library/typing.html) with
   ["mypy –strict"](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html) and flake8 for linting and to approach static typing.
 * Examples of piping multiple iterators and filters (map, filter, reduce).
-* See if piping iterators and filters can work like lazy evaluation. Write examples and tests.
+* See if piping iterators and filters can do lazy evaluation. If they can, write some examples and tests.
 * Memoization
 
 Python won't give you real immutability but you can use frozen data structures
