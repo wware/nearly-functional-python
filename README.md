@@ -11,23 +11,28 @@ How functional can python be? Functional languages have:
 
 So here are some things to try.
 
-* Use [pyright](https://github.com/microsoft/pyright) and/or "mypy --strict" to approximate static typing
-* Use Python >= 3.10 to get pattern matching
-* Algebraic data types ([1](https://www.gidware.com/python-adts/), [2](https://stackoverflow.com/questions/16258553))
-* See what other new features are relevant
-* Use lots of [type hints](https://docs.python.org/3/library/typing.html) with
-  ["mypy –strict"](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html) and flake8 for linting and to approach static typing.
-* Examples of piping multiple iterators and filters (map, filter, reduce).
-* See if piping iterators and filters can do lazy evaluation. If they can, write some examples and tests.
-* Memoization
-
-Python won't give you real immutability but you can use frozen data structures
-([1](https://pypi.org/project/frozendict/),
- [2](https://pypi.org/project/frozenlist/),
- [3](https://docs.python.org/3/library/stdtypes.html?highlight=frozenset#frozenset),
- [4](https://docs.python.org/3/library/dataclasses.html#frozen-instances)). Maybe write a
-[pylint checker](https://pylint.pycqa.org/en/latest/development_guide/how_tos/custom_checkers.html#write-a-checker)
-that detects variable reassignment and maybe changes in data structures. This is a NICE-to-have, not a must-have.
+* Immutability
+  * Use [frozendict](https://pypi.org/project/frozendict/),
+    [frozenlist](https://pypi.org/project/frozenlist/),
+    [frozenset](https://docs.python.org/3/library/stdtypes.html?highlight=frozenset#frozenset),
+    [frozen dataclass instances](https://docs.python.org/3/library/dataclasses.html#frozen-instances)).
+  * Maybe write a
+    [pylint checker](https://pylint.pycqa.org/en/latest/development_guide/how_tos/custom_checkers.html#write-a-checker)
+    that detects variable reassignment.
+* Typing
+  * Use lots of [type hints](https://docs.python.org/3/library/typing.html) with
+    ["mypy –strict"](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html),
+    flake8, and
+    [pyright](https://github.com/microsoft/pyright)
+    for linting and to approximate static typing.
+  * Use Python >= 3.10 to get pattern matching and other relevant...
+  * Algebraic data types ([1](https://www.gidware.com/python-adts/), [2](https://stackoverflow.com/questions/16258553))
+* Iterators, lazy evaluation, etc
+  * Read this [Pycon thing](https://pycon2019.trey.io/iterator-protocol.html) about lazy iterators.
+  * Mess around with examples (map, filter, reduce, things I've seen done in OCaml or Haskell).
+* Tail call recursion
+  * [It already exists](https://pypi.org/project/tail-recursive/). I just need to whip up a few examples.
+* Memoization??
 
 ## FP advocacy
 
