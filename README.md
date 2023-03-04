@@ -15,7 +15,7 @@ So here are some things to try.
   * Use [frozendict](https://pypi.org/project/frozendict/),
     [frozenlist](https://pypi.org/project/frozenlist/),
     [frozenset](https://docs.python.org/3/library/stdtypes.html?highlight=frozenset#frozenset),
-    [frozen dataclass instances](https://docs.python.org/3/library/dataclasses.html#frozen-instances)).
+    [frozen dataclass instances](https://docs.python.org/3/library/dataclasses.html#frozen-instances).
   * Maybe write a
     [pylint checker](https://pylint.pycqa.org/en/latest/development_guide/how_tos/custom_checkers.html#write-a-checker)
     that detects variable reassignment.
