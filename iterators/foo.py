@@ -7,25 +7,17 @@ def count(n=0):
     """
     >>> c = count()
     >>> next(c)
-    start
     0
     >>> next(c)
-    loop
     1
     >>> next(c)
-    loop
     2
     >>> next(c)
-    loop
     3
     """
-    print("start")
     while True:
         yield n
         n += 1
-        print("loop")
-    print("end")
-
 
 
 def generatorify(iterable):
@@ -64,9 +56,54 @@ def all_same(it):
 
 
 """
-Next I want to do something clever with lazy evaluation and filtering.
-Something where the filter lets you avoid some expensive computation.
+Next I want to do something with lazy evaluation and filtering,
+where the filter lets you avoid some expensive computation.
 """
+
+
+def take(n, it):
+    it = iter(it)
+    lst = []
+    while n:
+        lst.append(next(it))
+        n -= 1
+    return lst
+
+
+def lazy_map(f, it):
+    """
+    >>> def make_tuples(x):
+    ...   return (x, x+1)
+    ...
+    >>> z = lazy_map(make_tuples, count(1))
+    >>> z
+    <generator object lazy_map at 0x...>
+    >>> take(5, z)
+    [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6)]
+    """
+    for i in it:
+        yield f(i)
+
+
+def lazy_filter(f, it):
+    """
+    >>> def make_tuples(x):
+    ...   return (x, x+1)
+    ...
+    >>> def is_odd(x):
+    ...   return (x % 2) != 0
+    ...
+    >>> z = lazy_map(make_tuples, lazy_filter(is_odd, count(1)))
+    >>> z
+    <generator object lazy_map at 0x...>
+    >>> take(5, z)
+    [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10)]
+    """
+    # The example above would have been more dramatic if "make_tuples" did
+    # something really expensive, like test primality or generate an RSA key.
+    for i in it:
+        if f(i):
+            yield i
 
 
 if __name__ == '__main__':
