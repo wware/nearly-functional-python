@@ -18,21 +18,20 @@ class UniversityClass(BaseModel, frozen=True):
     students: List[Student]
     
     def __iter__(self):
-        return IterHelper(self)
+        return self.IterHelper(self)
 
+    class IterHelper(object):
+        def __init__(self, p):
+            self.p = p
+            self.current_index = 0
 
-class IterHelper(object):
-    def __init__(self, p: UniversityClass):
-        self.p = p
-        self._current_index=0
-
-    def __next__(self):
-        try:
-            this = (self.p.lecturers + self.p.students)[self._current_index]
-            self._current_index += 1
-            return this
-        except IndexError:
-            raise StopIteration
+        def __next__(self):
+            try:
+                this = (self.p.lecturers + self.p.students)[self.current_index]
+                self.current_index += 1
+                return this
+            except IndexError:
+                raise StopIteration
 
 
 def _filter(self, f):
@@ -53,11 +52,13 @@ def _take(n: int, it):
         n -= 1
         yield i
 
+
 def numbers():
     n = 0
     while True:
         yield n
         n += 1
+
 
 if __name__ == '__main__':
     s1 = Student(first_name='Andrew', last_name='Brown')
@@ -76,11 +77,12 @@ if __name__ == '__main__':
         print(member)
 
     print("")
-    for member in _filter(uni_cl, lambda x: 'n' in x.last_name):
+    for member in _filter(uni_cl,
+                          lambda x: 'n' in x.last_name):
         print(member)
 
     print("")
     u = _filter(numbers(),
-                      lambda n:  n % 3 == 0)
+                lambda n:  n % 3 == 0)
     u = _map(u, lambda n: n * 0.5)
     print(list(_take(6, u)))
