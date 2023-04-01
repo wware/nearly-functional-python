@@ -1,64 +1,71 @@
-from dataclasses import dataclass
-from typing import List, Union
+from pydantic import BaseModel
+from typing import List
 
-@dataclass
-class Student:
+
+class Student(BaseModel, frozen=True):
     first_name: str
     last_name: str
 
 
-@dataclass
-class Lecturer:
+class Lecturer(BaseModel, frozen=True):
     first_name: str
     last_name: str
     subject: str
 
 
-class IterHelper(object):
-    def __iter__(self):
-        return self
-
-    def filter(self, f):
-        for i in self:
-            if f(i):
-                yield i
-
-    def map(self, f):
-        for i in self:
-            yield f(i)
-
-    def reset(self):
-        raise NotImplementedError
-
-    def __next__(self):
-        raise NotImplementedError
-
-
-@dataclass
-class UniversityClass(IterHelper):
+class UniversityClass(BaseModel, frozen=True):
     lecturers: List[Lecturer]
     students: List[Student]
-    _current_index: int = 0
+    
+    def __iter__(self):
+        return IterHelper(self)
 
-    def reset(self):
+
+class IterHelper(object):
+    def __init__(self, p: UniversityClass):
+        self.p = p
         self._current_index=0
 
     def __next__(self):
         try:
-            this = (self.lecturers + self.students)[self._current_index]
+            this = (self.p.lecturers + self.p.students)[self._current_index]
             self._current_index += 1
             return this
         except IndexError:
             raise StopIteration
 
 
-if __name__ == '__main__':
-    s1 = Student('Andrew', 'Brown')
-    s2 = Student('Helen', 'White')
-    s3 = Student('George', 'Johnson')
+def _filter(self, f):
+     for i in self:
+         if f(i):
+            yield i
 
-    l1 = Lecturer('Maria', 'Richardson', 'Algorithms')
-    l2 = Lecturer('Bob', 'Johanson', 'Programming')
+
+def _map(self, f):
+    for i in self:
+         yield f(i)
+
+
+def _take(n: int, it):
+    for i in it:
+        if n <= 0:
+            return
+        n -= 1
+        yield i
+
+def numbers():
+    n = 0
+    while True:
+        yield n
+        n += 1
+
+if __name__ == '__main__':
+    s1 = Student(first_name='Andrew', last_name='Brown')
+    s2 = Student(first_name='Helen', last_name='White')
+    s3 = Student(first_name='George', last_name='Johnson')
+
+    l1 = Lecturer(first_name='Maria', last_name='Richardson', subject='Algorithms')
+    l2 = Lecturer(first_name='Bob', last_name='Johanson', subject='Programming')
 
     uni_cl = UniversityClass(
         lecturers=[l1 ,l2],
@@ -69,6 +76,11 @@ if __name__ == '__main__':
         print(member)
 
     print("")
-    uni_cl.reset()
-    for member in uni_cl.filter(lambda x: 'n' in x.last_name):
+    for member in _filter(uni_cl, lambda x: 'n' in x.last_name):
         print(member)
+
+    print("")
+    u = _filter(numbers(),
+                      lambda n:  n % 3 == 0)
+    u = _map(u, lambda n: n * 0.5)
+    print(list(_take(6, u)))
