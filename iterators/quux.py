@@ -14,6 +14,30 @@ class Lecturer(BaseModel, frozen=True):
 
 
 class UniversityClass(BaseModel, frozen=True):
+    """
+    >>> s1 = Student(first_name='Andrew', last_name='Brown')
+    >>> s2 = Student(first_name='Helen', last_name='White')
+    >>> s3 = Student(first_name='George', last_name='Johnson')
+    >>> l1 = Lecturer(first_name='Maria', last_name='Richardson', subject='Algorithms')
+    >>> l2 = Lecturer(first_name='Bob', last_name='Johanson', subject='Programming')
+    >>> uni_cl = UniversityClass(
+    ...     lecturers=[l1 ,l2],
+    ...     students=[s1, s2, s3]
+    ... )
+    >>> for member in uni_cl:
+    ...     print(member)
+    first_name='Maria' last_name='Richardson' subject='Algorithms'
+    first_name='Bob' last_name='Johanson' subject='Programming'
+    first_name='Andrew' last_name='Brown'
+    first_name='Helen' last_name='White'
+    first_name='George' last_name='Johnson'
+    >>> for member in _filter(uni_cl, lambda x: 'n' in x.last_name):
+    ...    print(member)
+    first_name='Maria' last_name='Richardson' subject='Algorithms'
+    first_name='Bob' last_name='Johanson' subject='Programming'
+    first_name='Andrew' last_name='Brown'
+    first_name='George' last_name='Johnson'
+    """
     lecturers: List[Lecturer]
     students: List[Student]
     
@@ -54,35 +78,14 @@ def _take(n: int, it):
 
 
 def numbers():
+    """
+    >>> u = _filter(numbers(),
+    ...             lambda n:  n % 3 == 0)
+    >>> u = _map(u, lambda n: n * 0.5)
+    >>> print(list(_take(6, u)))
+    [0.0, 1.5, 3.0, 4.5, 6.0, 7.5]
+    """
     n = 0
     while True:
         yield n
         n += 1
-
-
-if __name__ == '__main__':
-    s1 = Student(first_name='Andrew', last_name='Brown')
-    s2 = Student(first_name='Helen', last_name='White')
-    s3 = Student(first_name='George', last_name='Johnson')
-
-    l1 = Lecturer(first_name='Maria', last_name='Richardson', subject='Algorithms')
-    l2 = Lecturer(first_name='Bob', last_name='Johanson', subject='Programming')
-
-    uni_cl = UniversityClass(
-        lecturers=[l1 ,l2],
-        students=[s1, s2, s3]
-    )
-
-    for member in uni_cl:
-        print(member)
-
-    print("")
-    for member in _filter(uni_cl,
-                          lambda x: 'n' in x.last_name):
-        print(member)
-
-    print("")
-    u = _filter(numbers(),
-                lambda n:  n % 3 == 0)
-    u = _map(u, lambda n: n * 0.5)
-    print(list(_take(6, u)))
