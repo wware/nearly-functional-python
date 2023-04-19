@@ -51,3 +51,23 @@ important to write bullet-proof code in a world that needs a lot more bullet-pro
 and a good writer and those videos represent a ton of work. In addition to the Cornell OCaml course he has also worked
 on theorem provers, formally provable software correctness, [Coq](https://coq.inria.fr/), all that good stuff that
 historically set the direction for FP.
+
+## More stuff
+
+I asked Google Bard for a code review, and it unhelpfully said "the code looks good already", but suggested some
+additional FP topics to include.
+
+* Currying is a technique that allows you to break down a function that takes multiple arguments into a series of
+  functions that each take a single argument. This can be useful for making functions more composable and reusable.
+* Partial application is a technique that allows you to create a function that is specialized for a particular set of
+  arguments. This can be useful for making functions more efficient and for avoiding errors.
+* Higher-order functions take other functions as arguments or return functions as results. This can be useful for making
+  functions more flexible and powerful. *Python already does this: decorators, etc.*
+* Lazy evaluation is a technique that delays the evaluation of expressions until they are needed. This can be useful for
+  improving performance and avoiding memory leaks.
+* Recursion is a technique that allows a function to call itself. This can be useful for solving problems that are
+  naturally recursive in nature.
+* Pattern matching is a technique that allows you to match data against a set of patterns. This can be useful for making
+  code more concise and readable. *Probably belongs in the `typing` area.*
+* Monads are a way of structuring code that can be used to implement many of the other functional programming idioms.
+  They are a powerful tool that can be used to make code more concise, elegant, and correct.
