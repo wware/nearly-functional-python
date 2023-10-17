@@ -1,3 +1,11 @@
+"""
+Things to do here:
+
+    pylint dbhack.py
+    mypy dbhack.py
+    python3 dbhack.py
+"""
+
 import os
 # pylint: disable=missing-function-docstring
 # pylint: disable=too-few-public-methods
@@ -6,10 +14,12 @@ import logging
 import sys
 from typing import Generator
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, insert, select
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy.engine import Engine, cursor
+from sqlalchemy.sql import sqltypes
 # pylint: disable=no-name-in-module
-from pydantic import BaseModel
+from pydantic import BaseModel, create_model
 # pylint: enable=no-name-in-module
 
 is_debugging = os.environ.get("DEBUG", "").lower() in ['1', 'true', 'yes']
@@ -31,33 +41,6 @@ def execute_db(engine: Engine, *args, **kw):
         with connection.begin():                     # type: ignore
             return connection.execute(sql, *args)    # type: ignore
 
-
-class Table(BaseModel, frozen=True):
-
-    @classmethod
-    def create(cls, eng: Engine):
-        fsql = ", ".join([
-            f"{f.name} {f.type_.__name__}"
-            for f in cls.__fields__.values()
-        ])
-        execute_db(eng, f"CREATE TABLE {cls.__name__} ({fsql})", stacklevel=3)
-
-    @classmethod
-    def insert(cls, eng: Engine, **kw):
-        obj = cls(**kw)
-        fsql = ", ".join(map(repr, obj.dict().values()))
-        execute_db(eng,
-                   f"INSERT INTO {cls.__name__} VALUES ({fsql})",
-                   stacklevel=3)
-
-    @classmethod
-    def select(cls, eng: Engine, *clauses) -> cursor.CursorResult:
-        csql = " AND ".join(clauses)
-        if csql:
-            csql = f"WHERE {csql}"
-        return execute_db(eng,
-                          f"SELECT * FROM {cls.__name__} {csql}",
-                          stacklevel=3)
 
 
 class BaseQuery:
@@ -81,15 +64,61 @@ class BaseQuery:
 #######################################
 
 
-class Person(Table, frozen=True):
-    name: str
-    age: int
-    # id: int     # auto increment???
+metadata_obj = MetaData()
 
 
-class Book(Table, frozen=True):
-    owner: str     # use ID instead?
-    title: str
+def validatingTable(T):
+    def get_type_for(col):
+        if isinstance(col.type, sqltypes.Integer):
+            return 123
+        elif isinstance(col.type, sqltypes.String):
+            return 'abc'
+        else:
+            raise Exception(col.type)
+    # Still much to do to figure this out
+    # https://docs.pydantic.dev/usage/models/
+    types = dict(((c.name, get_type_for(c)) for c in T.columns))
+    print(types)
+    strategy = create_model('Strategy', **types)
+    return T
+
+person = validatingTable(Table(
+    "Person",
+    metadata_obj,
+    Column("id", Integer, primary_key=True),
+    Column("name", String(16), nullable=False),
+    Column("age", Integer)
+))
+
+
+book = validatingTable(Table(
+    "Book",
+    metadata_obj,
+    Column("id", Integer, primary_key=True),
+    Column("title", String(16), nullable=False),
+    Column("owner_id", Integer, ForeignKey("Person.id"), nullable=False),
+))
+
+
+
+
+def insert_into(engine: Engine, table: Table, **params):
+    stmt = insert(table).values(**params)
+    with engine.begin() as conn:
+        # begin handles commit and rollback
+        result = conn.execute(stmt)
+        conn.commit()
+
+
+def get_id(engine: Engine, table: Table, **params):
+    cols = getattr(table, 'c')
+    stmt = select(getattr(cols, 'id'))
+    for k, v in params.items():
+        stmt = stmt.where(getattr(cols, k) == v)
+    with engine.connect() as conn:
+        things = conn.execute(stmt).fetchall()
+        assert len(things) == 1, (stmt.compile(), things)
+        return things[0][0]
 
 
 class YoungFolksWithBooks(BaseQuery):
@@ -98,7 +127,7 @@ class YoungFolksWithBooks(BaseQuery):
         Person.name
     FROM Person
     JOIN Book
-        ON Book.owner = Person.name
+        ON Book.owner_id = Person.id
     WHERE age < :cutoff
     """
     class Result(BaseModel, frozen=True):
@@ -110,20 +139,23 @@ class YoungFolksWithBooks(BaseQuery):
 
 @pytest.fixture
 def testdb() -> Engine:
-    return create_engine("sqlite:///:memory:")
+    e = create_engine("sqlite:///:memory:")
+    return e
 
 
 @pytest.fixture
 def scenario(testdb):
     assert isinstance(testdb, Engine), testdb
-    Person.create(testdb)
-    Person.insert(testdb, name='Alice', age=23)
-    Person.insert(testdb, name='Bob', age=25)
-    Person.insert(testdb, name='Charlie', age=12)
-    Book.create(testdb)
-    Book.insert(testdb, owner="Alice", title="Book 1")
-    Book.insert(testdb, owner="Alice", title="Book 2")
-    Book.insert(testdb, owner="Bob", title="Book 3")
+    metadata_obj.create_all(testdb)
+    insert_into(testdb, person, name="Alice", age=23)
+    insert_into(testdb, person, name="Bob", age=25)
+    insert_into(testdb, person, name="Charlie", age=12)
+
+    id1 = get_id(testdb, person, name="Alice")
+    insert_into(testdb, book, owner_id=id1, title="Book 1")
+    insert_into(testdb, book, owner_id=id1, title="Book 2")
+    id2 = get_id(testdb, person, name="Bob")
+    insert_into(testdb, book, owner_id=id2, title="Book 3")
     return testdb
 
 
@@ -134,15 +166,28 @@ def test_1_check_engine(scenario):
 
 def test_2_everybody(scenario):
     eng = scenario
+    stmt = select(person.c.name, person.c.age)
+    with eng.connect() as conn:
+        z = conn.execute(stmt)
     # fetchone or fetchall from a table returns a list of tuples
-    assert Person.select(eng).fetchall() == [
+    assert z.fetchall() == [
         ('Alice', 23), ('Bob', 25), ('Charlie', 12)
     ]
 
 
+def test_2_check_types(scenario):
+    eng = scenario
+    with pytest.raises(Exception):
+        # age should be an integer
+        insert_into(eng, person, name="Debbie", age="young")
+
+
 def test_3_select_with_where_clause(scenario):
     eng = scenario
-    assert Person.select(eng, 'age > 24').fetchall() == [
+    stmt = select(person.c.name, person.c.age).where(person.c.age > 24)
+    with eng.connect() as conn:
+        z = conn.execute(stmt)
+    assert z.fetchall() == [
         ('Bob', 25)
     ]
 
