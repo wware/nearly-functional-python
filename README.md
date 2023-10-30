@@ -2,13 +2,14 @@
 
 This repository contains some ideas to make Python as nearly FP as possible, with some example code.
 
-How functional can python be? Functional languages have:
+Principles of functional programming
 
-* Immutable values and variables and complex types
+* Functions are first-class objects (already baked into python)
+* Immutable values and variables
 * Functions should not have side-effects (modifying global state, performing I/O)
-* Lazy evaluation
-* Tail-call optimization
-* Algebraic data types
+* Sophistocated, expressive types
+* Iterators, lazy evaluation
+* Tail-call recursion??
 
 So here are some things to try.
 
@@ -31,8 +32,9 @@ So here are some things to try.
      [2](https://benhoyt.com/writings/python-pattern-matching/)) and also...
   * [Algebraic data types](https://stackoverflow.com/questions/16258553)
 * Iterators, lazy evaluation, etc
-  * Read this [Pycon thing](https://pycon2019.trey.io/iterator-protocol.html) about lazy iterators.
+  * A nice [Pycon thing](https://pycon2019.trey.io/iterator-protocol.html) about lazy iterators.
   * Mess around with examples (map, filter, reduce, things I've seen done in OCaml or Haskell).
+  * Haskell has a GREAT lazy evaluation story, Python basically just has iterators.
   * I'm not super familiar with lazy evaluation but it sounds very valuable. Some things about it...
     * Lazy evaluation is a technique that delays the evaluation of expressions until they are needed. This can be useful for improving performance and avoiding memory leaks.
     * [Lazy evaluation](https://wiki.c2.com/?LazyEvaluation)
