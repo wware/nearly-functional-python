@@ -4,13 +4,6 @@ This repository contains some ideas to make Python as nearly FP as possible, wit
 
 ## Principles of functional programming
 
-* Functions are first-class objects (already baked into python)
-* Functions should not have side-effects because side effects are how a lot of bugs creep in
-* Immutable values and variables are an easy way to reduce side effects
-* Sophistocated, expressive types are a way to reduce bugs by adding more guardrails
-* Iterators, lazy evaluation, why is this an FP principle? it's cool and all...
-* Tail-call recursion?? a bit obscure and academic...
-
 ### Functions as first-class objects
 
 This has a number of implications. There are libraries for making use of them.
